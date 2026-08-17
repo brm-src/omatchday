@@ -89,7 +89,7 @@ Omatchday consulta la API pública de ESPN vía HTTPS, sin API key, OAuth ni pro
 ```bash
 python3 -m unittest discover -s tests -v
 python3 -m py_compile omatchday.py
-qmllint -I /usr/share/omarchy/shell BarWidget.qml Panel.qml
+qmllint -I /usr/share/omarchy/shell main.qml Panel.qml
 omarchy plugin validate .
 bash -n configure-omatchday.sh
 git diff --check
