@@ -59,12 +59,12 @@ BarWidget {
 
   IpcHandler {
     target: root.moduleName
-    function refresh(): void { root.broadcast("refresh") }
-    function open(): void { root.open() }
-    function close(): void { root.close() }
-    function show(): void { root.open() }
-    function hide(): void { root.close() }
-    function toggle(): void { root.togglePanel() }
+    function refresh() { root.broadcast("refresh") }
+    function open() { root.open() }
+    function close() { root.close() }
+    function show() { root.open() }
+    function hide() { root.close() }
+    function toggle() { root.togglePanel() }
   }
 
   WidgetButton {
