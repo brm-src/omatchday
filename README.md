@@ -6,7 +6,7 @@ Omatchday es un bar-widget de Omarchy para seguir fútbol sin invadir el escrito
 
 ## Qué hace
 
-- Botón compacto en la barra: equipo favorito o `⚽` si todavía no hay configuración.
+- Botón compacto en la barra: `⚽`. El equipo configurado aparece dentro del popover.
 - Popover anclado al botón; no crea una superficie permanente sobre el escritorio.
 - Convive con Agenda, Weather y el resto de los popouts de Omarchy usando la coordinación nativa de la barra.
 - Próximo partido destacado con escudos, hora, competición y estadio.

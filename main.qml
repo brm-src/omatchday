@@ -60,7 +60,7 @@ BarWidget {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: panelLoader.item ? panelLoader.item.barLabel : "⚽"
+    text: "⚽"
     slotSize: Style.bar.statusSlot
     opticalSize: 17
     tooltipText: "Omatchday · partidos"
