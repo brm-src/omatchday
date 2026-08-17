@@ -1,22 +1,45 @@
 # Omatchday
 
-Omatchday es un centro de partidos para Omarchy: equipos favoritos, próximos encuentros, resultados anteriores, estados en vivo y calendario mensual, usando los colores del tema activo.
+Omatchday es un bar-widget de Omarchy para seguir fútbol sin invadir el escritorio. Muestra un botón en la barra superior derecha y abre el centro de partidos solo cuando lo necesitas.
 
-![Omatchday preview](preview.svg)
+![Omatchday](preview.svg)
 
-## Estado
+## Qué hace
 
-Primera versión funcional. La interfaz vive como servicio de Quickshell y obtiene datos de fútbol directamente desde ESPN, sin API key ni proxy propio. La fuente puede cambiarse en el backend más adelante sin rehacer la UI.
+- Botón compacto en la barra: equipo favorito o `⚽` si todavía no hay configuración.
+- Popover anclado al botón; no crea una superficie permanente sobre el escritorio.
+- Convive con Agenda, Weather y el resto de los popouts de Omarchy usando la coordinación nativa de la barra.
+- Próximo partido destacado con escudos, hora, competición y estadio.
+- Vistas de próximos partidos, resultados y calendario mensual.
+- Estados `EN VIVO`, `FINAL` y `PRÓXIMO`.
+- Varios equipos y varias ligas.
+- Colores derivados del tema activo y acento del equipo.
+- Clic en un partido para abrir su detalle.
+- Refresh manual con clic central o desde el popover.
+- Caché visual del último estado mientras se actualiza la fuente.
 
-## Instalar localmente
-
-Desde este repositorio:
+## Instalar desde GitHub
 
 ```bash
-bash configure-omatchday.sh
+omarchy plugin add https://github.com/brm-src/omatchday.git --enable --yes
 ```
 
-El configurador pregunta por códigos de ligas ESPN y permite escoger equipos por número. Algunos ejemplos:
+O actualizar una instalación existente:
+
+```bash
+omarchy plugin update io.github.brm-src.omatchday --yes
+omarchy-shell shell rescanPlugins
+```
+
+El plugin queda disponible en la lista de widgets de la barra. Si la barra no lo muestra automáticamente, agrega `io.github.brm-src.omatchday` al bloque `bar.layout.right` de `~/.config/omarchy/shell.json`.
+
+## Configurar equipos
+
+```bash
+bash ~/.config/omarchy/plugins/io.github.brm-src.omatchday/configure-omatchday.sh
+```
+
+El asistente consulta el catálogo real de ESPN y permite escoger equipos por número. Algunos códigos de liga:
 
 - `eng.1` — Premier League
 - `esp.1` — LaLiga
@@ -28,31 +51,14 @@ El configurador pregunta por códigos de ligas ESPN y permite escoger equipos po
 
 La configuración queda en `~/.config/omarchy/omatchday/config.json` con permisos `600`.
 
-Para instalar el candidato como plugin local:
+## Controles
 
-```bash
-omarchy plugin add /home/brm/omatchday --yes
-omarchy plugin enable io.github.brm-src.omatchday
-omarchy-shell shell rescanPlugins
-```
-
-El plugin se puede abrir/cerrar desde IPC:
-
-```bash
-omarchy-shell shell toggle io.github.brm-src.omatchday
-```
-
-## Qué muestra
-
-- Próximo partido destacado.
-- Hasta cinco partidos próximos.
-- Hasta cinco resultados anteriores.
-- Estado en vivo y marcador.
-- Competición, estadio y ciudad cuando la API los entrega.
-- Vista mensual con días que tienen partidos.
-- Logos remotos con fallback a abreviaturas.
-- Refresh manual y automático.
-- Oculta la tarjeta cuando hay una ventana activa para no invadir aplicaciones.
+- Clic izquierdo en el botón: abrir/cerrar el popover.
+- Clic central: actualizar datos.
+- `Esc`: cerrar.
+- `Tab`: pasar al siguiente popout de la barra.
+- Clic en un partido: abrir detalle en el navegador.
+- En el popover: cambiar entre próximos, resultados y calendario.
 
 ## Configuración avanzada
 
@@ -76,14 +82,14 @@ omarchy-shell shell toggle io.github.brm-src.omatchday
 }
 ```
 
-Omatchday solo envía consultas HTTPS a la API pública de ESPN. No solicita credenciales ni instala paquetes. La API puede tener límites, cambios de cobertura o retrasos; esos estados se muestran en la interfaz en lugar de inventar resultados.
+Omatchday consulta la API pública de ESPN vía HTTPS, sin API key, OAuth ni proxy propio. La cobertura y los límites dependen de ESPN; el plugin muestra el error en lugar de inventar datos.
 
-## Validación
+## Desarrollo y validación
 
 ```bash
 python3 -m unittest discover -s tests -v
 python3 -m py_compile omatchday.py
-qmllint -I /usr/share/omarchy/shell Omatchday.qml
+qmllint -I /usr/share/omarchy/shell BarWidget.qml Panel.qml
 omarchy plugin validate .
 bash -n configure-omatchday.sh
 git diff --check

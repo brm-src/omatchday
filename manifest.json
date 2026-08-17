@@ -2,12 +2,18 @@
   "schemaVersion": 1,
   "id": "io.github.brm-src.omatchday",
   "name": "Omatchday",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Cris / brm-src",
   "license": "MIT",
   "description": "A theme-aware football match center for Omarchy: upcoming fixtures, live scores, results, and calendar view.",
-  "kinds": ["service"],
+  "kinds": ["bar-widget"],
   "entryPoints": {
-    "service": "Omatchday.qml"
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Omatchday",
+    "description": "Partidos y resultados en un popover de la barra.",
+    "category": "Info",
+    "allowMultiple": false
   }
 }
