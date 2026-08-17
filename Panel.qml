@@ -290,12 +290,12 @@ Panel {
         }
 
         Text { visible: root.view === "agenda" && root.upcomingEvents.length > 0; text: "PRÓXIMOS PARTIDOS"; color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.35); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.9 }
-        Repeater { visible: root.view === "agenda"; model: Math.min(root.upcomingEvents.length, 6); delegate: MatchRow { event: root.upcomingEvents[index]; upcoming: true } }
+        Repeater { model: root.view === "agenda" ? Math.min(root.upcomingEvents.length, 6) : 0; delegate: MatchRow { event: root.upcomingEvents[index]; upcoming: true } }
 
         Text { visible: root.view === "results" && root.selectedDate === "" && root.previousEvents.length > 0; text: "ÚLTIMOS RESULTADOS"; color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.35); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.9 }
-        Repeater { visible: root.view === "results" && root.selectedDate === ""; model: Math.min(root.previousEvents.length, 6); delegate: MatchRow { event: root.previousEvents[index]; upcoming: false } }
+        Repeater { model: root.view === "results" && root.selectedDate === "" ? Math.min(root.previousEvents.length, 6) : 0; delegate: MatchRow { event: root.previousEvents[index]; upcoming: false } }
         Text { visible: root.view === "results" && root.selectedDate !== ""; text: "PARTIDOS DEL " + root.selectedDate; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.8 }
-        Repeater { visible: root.view === "results" && root.selectedDate !== ""; model: root.selectedEvents.length; delegate: MatchRow { event: root.selectedEvents[index]; upcoming: !root.isPast(root.selectedEvents[index]) } }
+        Repeater { model: root.view === "results" && root.selectedDate !== "" ? root.selectedEvents.length : 0; delegate: MatchRow { event: root.selectedEvents[index]; upcoming: !root.isPast(root.selectedEvents[index]) } }
 
         Column {
           visible: root.view === "calendar"
