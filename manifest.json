@@ -8,7 +8,7 @@
   "description": "A theme-aware football match center for Omarchy: upcoming fixtures, live scores, results, and calendar view.",
   "kinds": ["bar-widget"],
   "entryPoints": {
-    "barWidget": "BarButton.qml"
+    "barWidget": "main.qml"
   },
   "barWidget": {
     "displayName": "Omatchday",
