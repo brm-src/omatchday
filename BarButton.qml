@@ -2,16 +2,12 @@ import QtQuick
 import qs.Commons
 import qs.Ui
 
-BarWidget {
+BarIconButton {
   id: root
-  moduleName: "io.github.brm-src.omatchday"
-  implicitWidth: button.implicitWidth
-  implicitHeight: button.implicitHeight
-  WidgetButton {
-    id: button
-    anchors.fill: parent
-    bar: root.bar
-    text: "⚽"
-    tooltipText: "Omatchday · partidos"
-  }
+  property string moduleName: "io.github.brm-src.omatchday"
+  property var settings: ({})
+  slotSize: Style.bar.statusSlot
+  opticalSize: 16
+  text: "⚽"
+  tooltipText: "Omatchday · partidos"
 }
