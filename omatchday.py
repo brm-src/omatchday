@@ -185,7 +185,7 @@ def normalize_event(event: dict, league: str, selected_ids: set[str], now: datet
         "status": str(status.get("shortDetail") or status.get("detail") or status.get("description") or "Programado"),
         "home": competitors[0],
         "away": competitors[1],
-        "league": str(event.get("season", {}).get("slug") or league).replace("-", " "),
+        "league": str(league or event.get("season", {}).get("slug") or "Fútbol"),
         "venue": str(venue.get("fullName") or "") if isinstance(venue, dict) else "",
         "city": str(address.get("city") or "") if isinstance(address, dict) else "",
         "url": f"https://www.espn.com/soccer/match/_/gameId/{event.get('id', '')}",
