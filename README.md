@@ -6,7 +6,7 @@ Omatchday es un bar-widget de Omarchy para seguir fútbol sin invadir el escrito
 
 ## Qué hace
 
-- Botón compacto en la barra: `⚽`. El equipo configurado aparece dentro del popover.
+- Botón compacto en la barra: `⚽`. La selección vive dentro del popover.
 - Popover anclado al botón; no crea una superficie permanente sobre el escritorio.
 - Convive con Agenda, Weather y el resto de los popouts de Omarchy usando la coordinación nativa de la barra.
 - Próximo partido destacado con escudos, hora, competición y estadio.
@@ -33,7 +33,11 @@ omarchy-shell shell rescanPlugins
 
 El plugin queda disponible en la lista de widgets de la barra. Si la barra no lo muestra automáticamente, agrega `io.github.brm-src.omatchday` al bloque `bar.layout.right` de `~/.config/omarchy/shell.json`.
 
-## Configurar equipos
+## Configurar equipos y notificaciones
+
+Abre Omatchday y pulsa `⚙`. Desde ahí puedes elegir la liga, marcar uno o más equipos y activar las notificaciones de partidos. No necesitas abrir una terminal. Los cambios quedan en `~/.config/omarchy/omatchday/config.json` con permisos `600`.
+
+También existe un asistente de terminal como respaldo:
 
 ```bash
 bash ~/.config/omarchy/plugins/io.github.brm-src.omatchday/configure-omatchday.sh
@@ -49,8 +53,6 @@ El asistente consulta el catálogo real de ESPN y permite escoger equipos por n�
 - `mex.1` — Liga MX
 - `conmebol.libertadores` — Copa Libertadores
 
-La configuración queda en `~/.config/omarchy/omatchday/config.json` con permisos `600`.
-
 ## Controles
 
 - Clic izquierdo en el botón: abrir/cerrar el popover.
@@ -59,6 +61,7 @@ La configuración queda en `~/.config/omarchy/omatchday/config.json` con permiso
 - `Tab`: pasar al siguiente popout de la barra.
 - Clic en un partido: abrir detalle en el navegador.
 - En el popover: cambiar entre próximos, resultados y calendario.
+- `⚙`: abrir la configuración interna.
 
 ## Configuración avanzada
 

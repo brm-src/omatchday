@@ -269,10 +269,24 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Omatchday football data helper")
     parser.add_argument("--catalog", metavar="LEAGUE", help="print the team catalog for a league")
     parser.add_argument("--configure", action="store_true", help="configure teams interactively")
+    parser.add_argument("--save-config", metavar="JSON", help="save a configuration object")
     args = parser.parse_args(argv)
     try:
         if args.configure:
             return configure_interactively()
+        if args.save_config:
+            config = json.loads(args.save_config)
+            if not isinstance(config, dict):
+                raise ValueError("La configuración debe ser un objeto JSON")
+            config["leagues"] = normalize_leagues(config.get("leagues"))
+            config["teams"] = normalize_teams(config.get("teams"))
+            config["daysBack"] = max(0, int(config.get("daysBack", DEFAULT_DAYS_BACK)))
+            config["daysForward"] = max(1, int(config.get("daysForward", DEFAULT_DAYS_FORWARD)))
+            config["refreshMinutes"] = max(5, int(config.get("refreshMinutes", 15)))
+            config["notifications"] = bool(config.get("notifications", False))
+            write_config(config)
+            json_out(saved=True, teams=config["teams"], notifications=config["notifications"])
+            return 0
         if args.catalog:
             print(json.dumps(teams_for_league(args.catalog), ensure_ascii=False, indent=2))
             return 0
@@ -286,6 +300,7 @@ def main(argv: list[str] | None = None) -> int:
             events=events,
             teams=normalize_teams(config.get("teams")),
             leagues=normalize_leagues(config.get("leagues")),
+            notifications=bool(config.get("notifications", False)),
             source="ESPN",
             error=("No se pudo actualizar: " + " · ".join(errors)) if errors and not events else "",
         )
