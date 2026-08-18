@@ -134,6 +134,7 @@ Panel {
 
   function openFromHotkey() {
     root.controller.show()
+    if (teams.length === 0) root.openConfig()
     root.refresh()
     Qt.callLater(function() {
       if (root.opened) setCenterHoverRevealSuppressed(true)
@@ -343,28 +344,28 @@ Panel {
           Text { text: "EQUIPOS"; color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.65); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.8 }
           Repeater {
             model: root.catalog
-            delegate: Rectangle {
+            delegate: Button {
               required property var modelData
               width: configColumn.width
-              height: 34
-              radius: 7
-              color: root.isDraftSelected(modelData) ? Util.alpha(Color.accent, 0.2) : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.055)
-              border.width: root.isDraftSelected(modelData) ? 1 : 0
-              border.color: Color.accent
-              Text { anchors.left: parent.left; anchors.leftMargin: 10; anchors.verticalCenter: parent.verticalCenter; text: modelData.name; color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10 }
-              Text { anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter; text: root.isDraftSelected(modelData) ? "✓" : "+"; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 13; font.bold: true }
-              MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.toggleDraftTeam(modelData) }
+              text: (root.isDraftSelected(modelData) ? "✓  " : "+  ") + modelData.name
+              leftAlign: true
+              selected: root.isDraftSelected(modelData)
+              bordered: true
+              foreground: root.bar ? root.bar.barForeground : Color.foreground
+              accent: Color.accent
+              onClicked: root.toggleDraftTeam(modelData)
             }
           }
 
-          Rectangle {
+          Button {
             width: parent.width
-            height: 38
-            radius: 7
-            color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.055)
-            Text { anchors.left: parent.left; anchors.leftMargin: 10; anchors.verticalCenter: parent.verticalCenter; text: "Notificaciones de partidos"; color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10 }
-            Text { anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter; text: root.notificationsEnabled ? "ACTIVADAS" : "DESACTIVADAS"; color: root.notificationsEnabled ? Color.accent : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.5); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true }
-            MouseArea { anchors.fill: parent; onClicked: root.notificationsEnabled = !root.notificationsEnabled }
+            text: "Notificaciones de partidos  ·  " + (root.notificationsEnabled ? "ACTIVADAS" : "DESACTIVADAS")
+            leftAlign: true
+            selected: root.notificationsEnabled
+            bordered: true
+            foreground: root.bar ? root.bar.barForeground : Color.foreground
+            accent: Color.accent
+            onClicked: root.notificationsEnabled = !root.notificationsEnabled
           }
 
           Text { visible: root.configMessage !== ""; width: parent.width; text: root.configMessage; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; wrapMode: Text.Wrap }
