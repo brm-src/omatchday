@@ -342,11 +342,18 @@ Panel {
           }
 
           Text { text: "EQUIPOS"; color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.65); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.8 }
-          Repeater {
+          ListView {
+            id: teamList
             model: root.catalog
+            width: configColumn.width
+            height: Math.min(280, Math.max(44, root.catalog.length * 40))
+            clip: true
+            spacing: Style.space(5)
+            boundsBehavior: Flickable.StopAtBounds
             delegate: Button {
               required property var modelData
-              width: configColumn.width
+              width: teamList.width
+              height: 34
               text: (root.isDraftSelected(modelData) ? "✓  " : "+  ") + modelData.name
               leftAlign: true
               selected: root.isDraftSelected(modelData)
