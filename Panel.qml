@@ -342,6 +342,7 @@ Panel {
           }
 
           Text { text: "EQUIPOS"; color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.65); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.8 }
+          Text { text: root.draftTeams.length > 0 ? root.draftTeams.length + " seleccionados · puedes elegir varios" : "Ningún equipo seleccionado"; color: root.draftTeams.length > 0 ? Color.accent : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.55); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9 }
           ListView {
             id: teamList
             model: root.catalog
@@ -379,7 +380,7 @@ Panel {
           Row {
             spacing: Style.space(5)
             Button { text: "Cancelar"; foreground: root.bar ? root.bar.barForeground : Color.foreground; onClicked: root.configOpen = false }
-            Button { text: "Guardar"; active: true; foreground: Color.background; accent: Color.accent; onClicked: root.saveConfig() }
+            Button { text: "Guardar"; height: 32; background: Color.accent; foreground: Color.background; accent: Color.accent; onClicked: root.saveConfig() }
           }
         }
 
