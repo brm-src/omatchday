@@ -18,6 +18,8 @@ Panel {
   readonly property var previousEvents: events.filter(function(event) { return root.isPast(event) }).reverse()
   readonly property var selectedEvents: selectedDate === "" ? events : events.filter(function(event) { return String(event.date || "") === selectedDate })
   readonly property var nextEvent: upcomingEvents.length > 0 ? upcomingEvents[0] : null
+  readonly property string nextLabel: root.nextEvent ? root.nextEvent.home.abbreviation + " vs " + root.nextEvent.away.abbreviation : ""
+  readonly property bool liveNow: root.nextEvent ? root.nextEvent.state === "in" : false
   readonly property var monthCells: buildMonthCells(shownMonth)
 
   property var events: []
@@ -34,6 +36,7 @@ Panel {
   property bool notificationsEnabled: false
   property string configMessage: ""
   property string lastNotifiedEvent: ""
+  property string lastNotifiedLive: ""
   property date shownMonth: new Date()
   property date today: new Date()
 
@@ -103,11 +106,19 @@ Panel {
   }
 
   function maybeNotify() {
-    if (!notificationsEnabled || !nextEvent || lastNotifiedEvent === String(nextEvent.id || "")) return
-    var remaining = new Date(String(nextEvent.timestamp || "")).getTime() - Date.now()
+    if (!notificationsEnabled) return
+    var event = nextEvent
+    if (!event || !event.id) return
+    if (event.state === "in" && lastNotifiedLive !== String(event.id)) {
+      Quickshell.execDetached(["notify-send", "Omatchday", "EN VIVO · " + root.eventLabel(event) + "  " + root.scoreLabel(event)])
+      lastNotifiedLive = String(event.id)
+      return
+    }
+    if (lastNotifiedEvent === String(event.id)) return
+    var remaining = new Date(String(event.timestamp || "")).getTime() - Date.now()
     if (remaining > 0 && remaining <= 60 * 60 * 1000) {
-      Quickshell.execDetached(["notify-send", "Omatchday", root.eventLabel(nextEvent) + " · " + nextEvent.time])
-      lastNotifiedEvent = String(nextEvent.id || "")
+      Quickshell.execDetached(["notify-send", "Omatchday", root.eventLabel(event) + " · " + event.time])
+      lastNotifiedEvent = String(event.id)
     }
   }
 

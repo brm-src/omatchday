@@ -6,7 +6,7 @@ Omatchday es un bar-widget de Omarchy para seguir fútbol sin invadir el escrito
 
 ## Qué hace
 
-- Botón compacto en la barra: `⚽`. La selección vive dentro del popover.
+- Botón compacto en la barra: `⚽`, y muestra la abreviatura del próximo partido (`⚽ RMA`). Si hay un partido en vivo, muestra el marcador (`⚽ 2:1`) con el acento del tema.
 - Popover anclado al botón; no crea una superficie permanente sobre el escritorio.
 - Convive con Agenda, Weather y el resto de los popouts de Omarchy usando la coordinación nativa de la barra.
 - Próximo partido destacado con escudos, hora, competición y estadio.
@@ -16,6 +16,7 @@ Omatchday es un bar-widget de Omarchy para seguir fútbol sin invadir el escrito
 - Colores derivados del tema activo y acento del equipo.
 - Clic en un partido para abrir su detalle.
 - Refresh manual con clic central o desde el popover.
+- Notificaciones: aviso 1 hora antes del partido y aviso cuando empieza (EN VIVO).
 - Caché visual del último estado mientras se actualiza la fuente.
 
 ## Instalar desde GitHub

@@ -26,6 +26,24 @@ BarWidget {
   readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false
   readonly property bool popoutSwitchClosing: panelLoader.item ? panelLoader.item.popoutSwitchClosing === true : false
 
+  readonly property string panelLabel: {
+    var panel = panelLoader.item
+    if (!panel) return "⚽"
+    if (panel.liveNow && panel.nextEvent) return "⚽ " + panel.nextEvent.home.score + ":" + panel.nextEvent.away.score
+    if (panel.nextLabel) return "⚽ " + panel.nextLabel.split(" vs ")[0]
+    return "⚽"
+  }
+
+  readonly property string panelTooltip: {
+    var panel = panelLoader.item
+    if (!panel) return "Omatchday · partidos"
+    if (panel.liveNow && panel.nextEvent) return panel.eventLabel(panel.nextEvent) + " · EN VIVO " + panel.scoreLabel(panel.nextEvent)
+    if (panel.nextEvent) return panel.eventLabel(panel.nextEvent) + " · " + panel.nextEvent.day + " " + panel.nextEvent.time
+    return "Omatchday · partidos"
+  }
+
+  readonly property bool panelLiveNow: panelLoader.item ? panelLoader.item.liveNow === true : false
+
   function open() {
     if (panelLoader.item && panelLoader.item.openFromHotkey) panelLoader.item.openFromHotkey()
   }
@@ -60,11 +78,11 @@ BarWidget {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: "⚽"
+    text: root.panelLabel
     slotSize: Style.bar.statusSlot
     opticalSize: 17
-    tooltipText: "Omatchday · partidos"
-    active: root.opened
+    tooltipText: root.panelTooltip
+    active: root.opened || root.panelLiveNow
     useActiveColor: true
     activeColor: Color.accent
 
