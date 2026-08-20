@@ -2,7 +2,7 @@
 
 Omatchday es un bar-widget de Omarchy para seguir fútbol sin invadir el escritorio. Muestra un botón en la barra superior derecha y abre el centro de partidos solo cuando lo necesitas.
 
-![Omatchday](preview.svg)
+![Omatchday](preview.png)
 
 ## Qué hace
 
