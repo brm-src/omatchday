@@ -10,6 +10,23 @@ Panel {
   ipcTarget: "io.github.brm-src.omatchday"
   manageIpc: false
 
+  property string uiLanguage: Qt.locale().name.toLowerCase().startsWith("es") ? "es" : "en"
+  readonly property bool isSpanish: uiLanguage === "es"
+
+  function words(es, en) { return root.isSpanish ? es : en }
+
+  function translateDay(value) {
+    var text = String(value || "")
+    if (root.isSpanish) return text
+    if (text === "HOY") return "TODAY"
+    if (text === "MAÑANA") return "TOMORROW"
+    var map = { "lun": "Mon", "mar": "Tue", "mié": "Wed", "jue": "Thu", "vie": "Fri", "sáb": "Sat", "dom": "Sun" }
+    for (var key in map) {
+      if (text.indexOf(key) === 0) return map[key] + text.substring(key.length)
+    }
+    return text
+  }
+
   property var anchorItem: null
   property var hostWidget: null
   readonly property var barIdentity: hostWidget || root
@@ -71,7 +88,7 @@ Panel {
   function isToday(date) { return date === dateKey(root.today) }
 
   function monthLabel() {
-    var locale = Qt.locale("es_CL")
+    var locale = Qt.locale()
     return locale.monthName(shownMonth.getMonth(), Locale.LongFormat) + " " + shownMonth.getFullYear()
   }
 
@@ -89,7 +106,7 @@ Panel {
   }
 
   function eventLabel(event) {
-    if (!event) return "Sin partidos"
+    if (!event) return root.words("Sin partidos", "No matches")
     return String(event.home.shortName || event.home.name) + " — " + String(event.away.shortName || event.away.name)
   }
 
@@ -100,9 +117,9 @@ Panel {
 
   function statusLabel(event) {
     if (!event) return ""
-    if (event.state === "in") return "EN VIVO"
-    if (event.completed || event.state === "post") return "FINAL"
-    return "PRÓXIMO"
+    if (event.state === "in") return root.words("EN VIVO", "LIVE")
+    if (event.completed || event.state === "post") return root.words("FINAL", "FULL TIME")
+    return root.words("PRÓXIMO", "UPCOMING")
   }
 
   function maybeNotify() {
@@ -110,7 +127,7 @@ Panel {
     var event = nextEvent
     if (!event || !event.id) return
     if (event.state === "in" && lastNotifiedLive !== String(event.id)) {
-      Quickshell.execDetached(["notify-send", "Omatchday", "EN VIVO · " + root.eventLabel(event) + "  " + root.scoreLabel(event)])
+      Quickshell.execDetached(["notify-send", "Omatchday", root.words("EN VIVO · ", "LIVE · ") + root.eventLabel(event) + "  " + root.scoreLabel(event)])
       lastNotifiedLive = String(event.id)
       return
     }
@@ -139,7 +156,7 @@ Panel {
       root.maybeNotify()
     } catch (error) {
       events = []
-      errorMessage = "No se pudo leer la respuesta de fútbol."
+      errorMessage = root.words("No se pudo leer la respuesta de fútbol.", "Could not read the football response.")
     }
   }
 
@@ -187,7 +204,7 @@ Panel {
   }
 
   function loadCatalog() {
-    configMessage = "Cargando equipos…"
+    configMessage = root.words("Cargando equipos…", "Loading teams…")
     catalogProc.command = ["python3", root.helperPath, "--catalog", root.configLeague]
     catalogProc.running = true
   }
@@ -201,7 +218,7 @@ Panel {
   }
 
   function saveConfig() {
-    configMessage = "Guardando…"
+    configMessage = root.words("Guardando…", "Saving…")
     var payload = { leagues: [configLeague], teams: draftTeams, daysBack: 45, daysForward: 90, refreshMinutes: 15, notifications: notificationsEnabled }
     saveProc.command = ["python3", root.helperPath, "--save-config", JSON.stringify(payload)]
     saveProc.running = true
@@ -216,10 +233,10 @@ Panel {
   function applyCatalog(raw) {
     try {
       catalog = JSON.parse(String(raw || "[]"))
-      configMessage = catalog.length > 0 ? "" : "No encontré equipos para esta liga."
+      configMessage = catalog.length > 0 ? "" : root.words("No encontré equipos para esta liga.", "No teams found for this league.")
     } catch (error) {
       catalog = []
-      configMessage = "No se pudo cargar el catálogo."
+      configMessage = root.words("No se pudo cargar el catálogo.", "Could not load the catalog.")
     }
   }
 
@@ -230,7 +247,7 @@ Panel {
       configOpen = false
       root.refresh()
     } catch (error) {
-      configMessage = "No se pudo guardar la configuración."
+      configMessage = root.words("No se pudo guardar la configuración.", "Could not save the configuration.")
     }
   }
 
@@ -314,12 +331,12 @@ Panel {
             width: parent.width - panelActions.width - Style.space(8)
             spacing: 1
             Text { text: "OMATCHDAY"; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: Style.font.caption; font.bold: true; font.letterSpacing: 1.5 }
-            Text { text: root.teams.length > 0 ? root.teams.map(function(team) { return team.abbreviation || team.shortName }).join(" · ") : "CENTRO DE PARTIDOS"; color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.5); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; elide: Text.ElideRight }
+            Text { text: root.teams.length > 0 ? root.teams.map(function(team) { return team.abbreviation || team.shortName }).join(" · ") : root.words("CENTRO DE PARTIDOS", "MATCH CENTER"); color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.5); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; elide: Text.ElideRight }
           }
           Row {
             id: panelActions
             spacing: Style.space(3)
-            Button { iconText: "⚙"; foreground: root.bar ? root.bar.barForeground : Color.foreground; tooltipText: "Configurar equipos y notificaciones"; onClicked: root.openConfig() }
+            Button { iconText: "⚙"; foreground: root.bar ? root.bar.barForeground : Color.foreground; tooltipText: root.words("Configurar equipos y notificaciones", "Configure teams and notifications"); onClicked: root.openConfig() }
             Button { iconText: "↻"; foreground: root.bar ? root.bar.barForeground : Color.foreground; onClicked: root.refresh() }
             Button { iconText: "×"; foreground: root.bar ? root.bar.barForeground : Color.foreground; onClicked: root.close() }
           }
@@ -333,14 +350,14 @@ Panel {
           width: parent.width
           spacing: Style.space(9)
 
-          Text { text: "CONFIGURACIÓN"; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; font.bold: true; font.letterSpacing: 0.8 }
-          Text { width: parent.width; text: "Elige una liga y los equipos que quieres seguir."; color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.65); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; wrapMode: Text.Wrap }
+          Text { text: root.words("CONFIGURACIÓN", "SETTINGS"); color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; font.bold: true; font.letterSpacing: 0.8 }
+          Text { width: parent.width; text: root.words("Elige una liga y los equipos que quieres seguir.", "Pick a league and the teams you want to follow."); color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.65); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; wrapMode: Text.Wrap }
 
-          Text { text: "LIGA"; color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.65); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.8 }
+          Text { text: root.words("LIGA", "LEAGUE"); color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.65); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.8 }
           Row {
             spacing: Style.space(4)
             Repeater {
-              model: [["eng.1", "ING"], ["esp.1", "ESP"], ["ita.1", "ITA"], ["ger.1", "GER"], ["fra.1", "FRA"]]
+              model: [["eng.1", root.words("ING", "ENG")], ["esp.1", "ESP"], ["ita.1", "ITA"], ["ger.1", "GER"], ["fra.1", "FRA"]]
               delegate: Button {
                 required property var modelData
                 text: modelData[1]
@@ -352,8 +369,8 @@ Panel {
             }
           }
 
-          Text { text: "EQUIPOS"; color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.65); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.8 }
-          Text { text: root.draftTeams.length > 0 ? root.draftTeams.length + " seleccionados · puedes elegir varios" : "Ningún equipo seleccionado"; color: root.draftTeams.length > 0 ? Color.accent : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.55); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9 }
+          Text { text: root.words("EQUIPOS", "TEAMS"); color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.65); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.8 }
+          Text { text: root.draftTeams.length > 0 ? root.draftTeams.length + root.words(" seleccionados · puedes elegir varios", " selected · you can pick several") : root.words("Ningún equipo seleccionado", "No team selected"); color: root.draftTeams.length > 0 ? Color.accent : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.55); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9 }
           ListView {
             id: teamList
             model: root.catalog
@@ -378,7 +395,7 @@ Panel {
 
           Button {
             width: parent.width
-            text: "Notificaciones de partidos  ·  " + (root.notificationsEnabled ? "ACTIVADAS" : "DESACTIVADAS")
+            text: root.words("Notificaciones de partidos", "Match notifications") + "  ·  " + (root.notificationsEnabled ? root.words("ACTIVADAS", "ENABLED") : root.words("DESACTIVADAS", "DISABLED"))
             leftAlign: true
             selected: root.notificationsEnabled
             bordered: true
@@ -390,8 +407,8 @@ Panel {
           Text { visible: root.configMessage !== ""; width: parent.width; text: root.configMessage; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; wrapMode: Text.Wrap }
           Row {
             spacing: Style.space(5)
-            Button { text: "Cancelar"; foreground: root.bar ? root.bar.barForeground : Color.foreground; onClicked: root.configOpen = false }
-            Button { text: "Guardar"; height: 32; background: Color.accent; foreground: Color.background; accent: Color.accent; onClicked: root.saveConfig() }
+            Button { text: root.words("Cancelar", "Cancel"); foreground: root.bar ? root.bar.barForeground : Color.foreground; onClicked: root.configOpen = false }
+            Button { text: root.words("Guardar", "Save"); height: 32; background: Color.accent; foreground: Color.background; accent: Color.accent; onClicked: root.saveConfig() }
           }
         }
 
@@ -410,7 +427,7 @@ Panel {
             spacing: Style.space(7)
             Row {
               width: parent.width
-              Text { width: parent.width - heroStatus.implicitWidth; text: root.nextEvent ? root.nextEvent.day + "  ·  " + root.nextEvent.time : ""; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; font.bold: true }
+              Text { width: parent.width - heroStatus.implicitWidth; text: root.nextEvent ? root.translateDay(root.nextEvent.day) + "  ·  " + root.nextEvent.time : ""; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; font.bold: true }
               Text { id: heroStatus; text: root.statusLabel(root.nextEvent); color: root.nextEvent && root.nextEvent.state === "in" ? Color.accent : Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.4); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.8 }
             }
             Row {
@@ -438,7 +455,7 @@ Panel {
           width: parent.width
           spacing: Style.space(5)
           Repeater {
-            model: [["agenda", "PRÓXIMOS"], ["results", "RESULTADOS"], ["calendar", "CALENDARIO"]]
+            model: [["agenda", root.words("PRÓXIMOS", "UPCOMING")], ["results", root.words("RESULTADOS", "RESULTS")], ["calendar", root.words("CALENDARIO", "CALENDAR")]]
             delegate: Rectangle {
               required property var modelData
               width: (parent.width - 10) / 3
@@ -451,12 +468,12 @@ Panel {
           }
         }
 
-        Text { visible: !root.configOpen && root.view === "agenda" && root.upcomingEvents.length > 0; text: "PRÓXIMOS PARTIDOS"; color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.35); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.9 }
+        Text { visible: !root.configOpen && root.view === "agenda" && root.upcomingEvents.length > 0; text: root.words("PRÓXIMOS PARTIDOS", "UPCOMING MATCHES"); color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.35); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.9 }
         Repeater { model: !root.configOpen && root.view === "agenda" ? Math.min(root.upcomingEvents.length, 6) : 0; delegate: MatchRow { event: root.upcomingEvents[index]; upcoming: true } }
 
-        Text { visible: !root.configOpen && root.view === "results" && root.selectedDate === "" && root.previousEvents.length > 0; text: "ÚLTIMOS RESULTADOS"; color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.35); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.9 }
+        Text { visible: !root.configOpen && root.view === "results" && root.selectedDate === "" && root.previousEvents.length > 0; text: root.words("ÚLTIMOS RESULTADOS", "LATEST RESULTS"); color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.35); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.9 }
         Repeater { model: !root.configOpen && root.view === "results" && root.selectedDate === "" ? Math.min(root.previousEvents.length, 6) : 0; delegate: MatchRow { event: root.previousEvents[index]; upcoming: false } }
-        Text { visible: !root.configOpen && root.view === "results" && root.selectedDate !== ""; text: "PARTIDOS DEL " + root.selectedDate; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.8 }
+        Text { visible: !root.configOpen && root.view === "results" && root.selectedDate !== ""; text: root.words("PARTIDOS DEL ", "MATCHES ON ") + root.selectedDate; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.8 }
         Repeater { model: !root.configOpen && root.view === "results" && root.selectedDate !== "" ? root.selectedEvents.length : 0; delegate: MatchRow { event: root.selectedEvents[index]; upcoming: !root.isPast(root.selectedEvents[index]) } }
 
         Column {
@@ -470,7 +487,7 @@ Panel {
             Text { width: parent.width - 46; text: root.monthLabel(); color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 12; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
             Button { iconText: "›"; foreground: root.bar ? root.bar.barForeground : Color.foreground; onClicked: root.moveMonth(1) }
           }
-          Grid { id: weekdayGrid; width: parent.width; columns: 7; columnSpacing: Style.space(2); Repeater { model: ["L", "M", "X", "J", "V", "S", "D"]; Text { required property string modelData; width: (weekdayGrid.width - 12) / 7; height: 14; text: modelData; color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.8); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; horizontalAlignment: Text.AlignHCenter } } }
+          Grid { id: weekdayGrid; width: parent.width; columns: 7; columnSpacing: Style.space(2); Repeater { model: root.isSpanish ? ["L", "M", "X", "J", "V", "S", "D"] : ["M", "T", "W", "T", "F", "S", "S"]; Text { required property string modelData; width: (weekdayGrid.width - 12) / 7; height: 14; text: modelData; color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.8); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; horizontalAlignment: Text.AlignHCenter } } }
           Grid { id: calendarGrid; width: parent.width; columns: 7; columnSpacing: Style.space(2); rowSpacing: Style.space(2); Repeater { model: root.monthCells; Rectangle { required property var modelData; width: (calendarGrid.width - 12) / 7; height: 24; radius: 6; color: root.isToday(modelData.date) ? Color.accent : (root.eventOnDate(modelData.date) ? Util.alpha(Color.accent, 0.16) : "transparent"); border.width: root.eventOnDate(modelData.date) && !root.isToday(modelData.date) ? 1 : 0; border.color: Util.alpha(Color.accent, 0.60); Text { anchors.centerIn: parent; text: modelData.day; color: root.isToday(modelData.date) ? Color.background : (modelData.inMonth ? (root.bar ? root.bar.barForeground : Color.foreground) : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.25)); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: root.eventOnDate(modelData.date) || root.isToday(modelData.date) } MouseArea { anchors.fill: parent; enabled: root.eventOnDate(modelData.date); cursorShape: Qt.PointingHandCursor; onClicked: root.selectDay(modelData.date) } } } }
         }
 
@@ -482,11 +499,11 @@ Panel {
           color: Util.alpha(Color.accent, 0.11)
           border.width: 1
           border.color: Util.alpha(Color.accent, 0.38)
-          Column { id: setupColumn; anchors.fill: parent; anchors.margins: 11; spacing: 5; Text { text: "ELIGE TUS EQUIPOS"; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.8 } Text { width: parent.width; text: "Configura ligas y equipos desde el asistente."; color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; wrapMode: Text.Wrap } Rectangle { width: setupButtonText.implicitWidth + 20; height: 28; radius: 7; color: setupButtonMouse.containsMouse ? Util.alpha(Color.accent, 0.8) : Color.accent; Text { id: setupButtonText; anchors.centerIn: parent; text: "Configurar"; color: Color.background; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true } MouseArea { id: setupButtonMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.openConfig() } } }
+          Column { id: setupColumn; anchors.fill: parent; anchors.margins: 11; spacing: 5; Text { text: root.words("ELIGE TUS EQUIPOS", "CHOOSE YOUR TEAMS"); color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.8 } Text { width: parent.width; text: root.words("Configura ligas y equipos desde el asistente.", "Set up leagues and teams from the assistant."); color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; wrapMode: Text.Wrap } Rectangle { width: setupButtonText.implicitWidth + 20; height: 28; radius: 7; color: setupButtonMouse.containsMouse ? Util.alpha(Color.accent, 0.8) : Color.accent; Text { id: setupButtonText; anchors.centerIn: parent; text: root.words("Configurar", "Configure"); color: Color.background; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true } MouseArea { id: setupButtonMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.openConfig() } } }
         }
 
-        Text { visible: !root.configOpen && root.events.length === 0 && root.teams.length > 0; width: parent.width; text: root.errorMessage || "No hay partidos en el rango configurado."; color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.5); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; wrapMode: Text.Wrap; textFormat: Text.PlainText }
-        Text { visible: !root.configOpen; width: parent.width; text: root.updatedAt ? "ESPN · actualizado " + root.updatedAt.substring(11, 16) : "ESPN"; color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.42); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9 }
+        Text { visible: !root.configOpen && root.events.length === 0 && root.teams.length > 0; width: parent.width; text: root.errorMessage || root.words("No hay partidos en el rango configurado.", "No matches in the configured range."); color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.5); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; wrapMode: Text.Wrap; textFormat: Text.PlainText }
+        Text { visible: !root.configOpen; width: parent.width; text: root.updatedAt ? "ESPN · " + root.words("actualizado", "updated") + " " + root.updatedAt.substring(11, 16) : "ESPN"; color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.42); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9 }
       }
     }
   }
@@ -515,7 +532,7 @@ Panel {
       anchors.leftMargin: 9
       anchors.rightMargin: 9
       spacing: 8
-      Text { width: 56; anchors.verticalCenter: parent.verticalCenter; text: event.day; color: upcoming ? Color.accent : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.52); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; elide: Text.ElideRight }
+      Text { width: 56; anchors.verticalCenter: parent.verticalCenter; text: root.translateDay(event.day); color: upcoming ? Color.accent : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.52); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; elide: Text.ElideRight }
       Column { width: parent.width - 56 - 78 - parent.spacing * 2; anchors.verticalCenter: parent.verticalCenter; spacing: 1; Text { width: parent.width; text: root.eventLabel(event); color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; font.bold: true; elide: Text.ElideRight } Text { width: parent.width; text: event.league || event.status || ""; color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.45); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; elide: Text.ElideRight } }
       Text { width: 78; anchors.verticalCenter: parent.verticalCenter; text: upcoming ? event.time : root.scoreLabel(event); color: upcoming ? (root.bar ? root.bar.barForeground : Color.foreground) : Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: upcoming ? 11 : 12; font.bold: true; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
     }

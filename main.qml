@@ -6,6 +6,11 @@ BarWidget {
   id: root
   moduleName: "io.github.brm-src.omatchday"
 
+  property string uiLanguage: Qt.locale().name.toLowerCase().startsWith("es") ? "es" : "en"
+  readonly property bool isSpanish: uiLanguage === "es"
+
+  function words(es, en) { return root.isSpanish ? es : en }
+
   function injectPanel() {
     var target = panelLoader.item
     if (!target) return
@@ -28,10 +33,10 @@ BarWidget {
 
   readonly property string panelTooltip: {
     var panel = panelLoader.item
-    if (!panel) return "Omatchday · partidos"
-    if (panel.liveNow && panel.nextEvent) return panel.eventLabel(panel.nextEvent) + " · EN VIVO " + panel.scoreLabel(panel.nextEvent)
-    if (panel.nextEvent) return panel.eventLabel(panel.nextEvent) + " · " + panel.nextEvent.day + " " + panel.nextEvent.time
-    return "Omatchday · partidos"
+    if (!panel) return root.words("Omatchday · partidos", "Omatchday · matches")
+    if (panel.liveNow && panel.nextEvent) return panel.eventLabel(panel.nextEvent) + " · " + root.words("EN VIVO", "LIVE") + " " + panel.scoreLabel(panel.nextEvent)
+    if (panel.nextEvent) return panel.eventLabel(panel.nextEvent) + " · " + panel.translateDay(panel.nextEvent.day) + " " + panel.nextEvent.time
+    return root.words("Omatchday · partidos", "Omatchday · matches")
   }
 
   readonly property bool panelLiveNow: panelLoader.item ? panelLoader.item.liveNow === true : false
