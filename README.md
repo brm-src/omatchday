@@ -34,6 +34,26 @@ omarchy-shell shell rescanPlugins
 
 El plugin queda disponible en la lista de widgets de la barra. Si la barra no lo muestra automáticamente, agrega `io.github.brm-src.omatchday` al bloque `bar.layout.right` de `~/.config/omarchy/shell.json`.
 
+## Quitar Omatchday
+
+Para deshabilitarlo sin borrar sus archivos:
+
+```bash
+omarchy plugin disable io.github.brm-src.omatchday
+```
+
+Para quitarlo completamente de la instalación:
+
+```bash
+omarchy plugin remove io.github.brm-src.omatchday --yes
+```
+
+El archivo de configuración local puede quedar en `~/.config/omarchy/omatchday/config.json`; bórralo solo si también quieres eliminar tus equipos y preferencias:
+
+```bash
+rm -f ~/.config/omarchy/omatchday/config.json
+```
+
 ## Configurar equipos y notificaciones
 
 Abre Omatchday y pulsa `⚙`. Desde ahí puedes elegir la liga, marcar uno o más equipos y activar las notificaciones de partidos. No necesitas abrir una terminal. Los cambios quedan en `~/.config/omarchy/omatchday/config.json` con permisos `600`.
