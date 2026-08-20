@@ -26,14 +26,6 @@ BarWidget {
   readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false
   readonly property bool popoutSwitchClosing: panelLoader.item ? panelLoader.item.popoutSwitchClosing === true : false
 
-  readonly property string panelLabel: {
-    var panel = panelLoader.item
-    if (!panel) return "⚽"
-    if (panel.liveNow && panel.nextEvent) return "⚽ " + panel.nextEvent.home.score + ":" + panel.nextEvent.away.score
-    if (panel.nextLabel) return "⚽ " + panel.nextLabel.split(" vs ")[0]
-    return "⚽"
-  }
-
   readonly property string panelTooltip: {
     var panel = panelLoader.item
     if (!panel) return "Omatchday · partidos"
@@ -78,7 +70,7 @@ BarWidget {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: root.panelLabel
+    text: "⚽"
     slotSize: Style.bar.statusSlot
     opticalSize: 17
     tooltipText: root.panelTooltip
