@@ -321,11 +321,24 @@ Panel {
 
       // pull-to-refresh: drag down from the top reveals a refresh indicator
       property bool refreshing: false
+      property bool _pulling: false
       onContentYChanged: {
-        if (contentY >= -40 && !refreshing && !root.configOpen) {
+        if (_pulling || refreshing || root.configOpen) return
+        if (contentY < -40) {
           refreshing = true
           refreshIndicator.visible = true
           root.refresh()
+          // hide indicator after a grace period (refresh re-enables content)
+          refreshHideTimer.restart()
+        }
+      }
+      onMovementStarted: _pulling = contentY <= 0
+      onMovementEnded: _pulling = false
+
+      Timer {
+        id: refreshHideTimer
+        interval: 900; repeat: false
+        onTriggered: {
           refreshing = false
           refreshIndicator.visible = false
         }
@@ -545,7 +558,8 @@ Panel {
           Column { id: setupColumn; anchors.fill: parent; anchors.margins: 11; spacing: 5; Text { text: root.words("ELIGE TUS EQUIPOS", "CHOOSE YOUR TEAMS"); color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.8 } Text { width: parent.width; text: root.words("Configura ligas y equipos desde el asistente.", "Set up leagues and teams from the assistant."); color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 11; wrapMode: Text.Wrap } Button { text: root.words("Configurar", "Configure"); fontFamily: root.bar ? root.bar.fontFamily : Style.font.menuFamily; fontSize: Style.font.caption; background: Color.accent; foreground: Color.background; onClicked: root.openConfig() } }
         }
 
-        Text { visible: !root.configOpen && root.events.length === 0 && root.teams.length > 0; width: parent.width; text: root.errorMessage || root.words("No hay partidos en el rango configurado.", "No matches in the configured range."); color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.5); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; wrapMode: Text.Wrap; textFormat: Text.PlainText }
+        Text { visible: !root.configOpen && root.events.length === 0 && root.teams.length > 0; width: parent.width; text: root.errorMessage || root.words("No hay partidos en el rango configurado.", "No matches in the configured range."); color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.5); font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 11; wrapMode: Text.Wrap; textFormat: Text.PlainText }
+        Text { visible: !root.configOpen && root.errorMessage !== "" && !footballProc.running; width: parent.width; text: root.errorMessage; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 11; wrapMode: Text.Wrap; textFormat: Text.PlainText }
         Row {
           visible: !root.configOpen
           width: parent.width
