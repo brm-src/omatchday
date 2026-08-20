@@ -319,6 +319,40 @@ Panel {
       boundsBehavior: Flickable.StopAtBounds
       interactive: contentHeight > height
 
+      // pull-to-refresh: drag down from the top reveals a refresh indicator
+      property bool refreshing: false
+      onContentYChanged: {
+        if (contentY >= -40 && !refreshing && !root.configOpen) {
+          refreshing = true
+          refreshIndicator.visible = true
+          root.refresh()
+          refreshing = false
+          refreshIndicator.visible = false
+        }
+      }
+
+      // overlay refresh indicator at the top
+      Rectangle {
+        id: refreshIndicator
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: 32; height: 32
+        radius: 16
+        color: Color.menu.background
+        border.width: 1
+        border.color: Color.accent
+        visible: false
+        z: 10
+        Text {
+          anchors.centerIn: parent
+          text: "⟳"
+          color: Color.accent
+          font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily
+          font.pixelSize: 16
+          RotationAnimation on rotation { from: 0; to: 360; duration: 700; loops: Animation.Infinite; running: parent.visible }
+        }
+      }
+
       Column {
         id: contentColumn
         width: scroll.width
@@ -453,17 +487,19 @@ Panel {
         Row {
           visible: !root.configOpen
           width: parent.width
-          spacing: Style.space(5)
+          spacing: Style.spacing.sm
           Repeater {
             model: [["agenda", root.words("PRÓXIMOS", "UPCOMING")], ["results", root.words("RESULTADOS", "RESULTS")], ["calendar", root.words("CALENDARIO", "CALENDAR")]]
-            delegate: Rectangle {
+            delegate: Button {
               required property var modelData
-              width: (parent.width - 10) / 3
-              height: 28
-              radius: 7
-              color: root.view === modelData[0] ? Util.alpha(Color.accent, 0.24) : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.06)
-              Text { anchors.centerIn: parent; text: modelData[1]; color: root.view === modelData[0] ? Color.accent : Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.35); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.5 }
-              MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.view = modelData[0] }
+              width: (parent.width - parent.spacing * 2) / 3
+              text: modelData[1]
+              selected: root.view === modelData[0]
+              active: root.view === modelData[0]
+              bordered: true
+              fontFamily: root.bar ? root.bar.fontFamily : Style.font.family
+              fontSize: Style.font.caption
+              onClicked: root.view = modelData[0]
             }
           }
         }
@@ -484,7 +520,14 @@ Panel {
             width: parent.width
             height: 25
             Button { iconText: "‹"; foreground: root.bar ? root.bar.barForeground : Color.foreground; onClicked: root.moveMonth(-1) }
-            Text { width: parent.width - 46; text: root.monthLabel(); color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 12; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+            Text { width: parent.width - 46 - todayButton.width; text: root.monthLabel(); color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 12; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+            Button {
+              id: todayButton
+              text: root.words("hoy", "today")
+              fontFamily: root.bar ? root.bar.fontFamily : Style.font.family
+              fontSize: Style.font.caption
+              onClicked: { shownMonth = new Date(); today = new Date(); selectedDate = "" }
+            }
             Button { iconText: "›"; foreground: root.bar ? root.bar.barForeground : Color.foreground; onClicked: root.moveMonth(1) }
           }
           Grid { id: weekdayGrid; width: parent.width; columns: 7; columnSpacing: Style.space(2); Repeater { model: root.isSpanish ? ["L", "M", "X", "J", "V", "S", "D"] : ["M", "T", "W", "T", "F", "S", "S"]; Text { required property string modelData; width: (weekdayGrid.width - 12) / 7; height: 14; text: modelData; color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.8); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; horizontalAlignment: Text.AlignHCenter } } }
@@ -499,11 +542,24 @@ Panel {
           color: Util.alpha(Color.accent, 0.11)
           border.width: 1
           border.color: Util.alpha(Color.accent, 0.38)
-          Column { id: setupColumn; anchors.fill: parent; anchors.margins: 11; spacing: 5; Text { text: root.words("ELIGE TUS EQUIPOS", "CHOOSE YOUR TEAMS"); color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.8 } Text { width: parent.width; text: root.words("Configura ligas y equipos desde el asistente.", "Set up leagues and teams from the assistant."); color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; wrapMode: Text.Wrap } Rectangle { width: setupButtonText.implicitWidth + 20; height: 28; radius: 7; color: setupButtonMouse.containsMouse ? Util.alpha(Color.accent, 0.8) : Color.accent; Text { id: setupButtonText; anchors.centerIn: parent; text: root.words("Configurar", "Configure"); color: Color.background; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true } MouseArea { id: setupButtonMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.openConfig() } } }
+          Column { id: setupColumn; anchors.fill: parent; anchors.margins: 11; spacing: 5; Text { text: root.words("ELIGE TUS EQUIPOS", "CHOOSE YOUR TEAMS"); color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.8 } Text { width: parent.width; text: root.words("Configura ligas y equipos desde el asistente.", "Set up leagues and teams from the assistant."); color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 11; wrapMode: Text.Wrap } Button { text: root.words("Configurar", "Configure"); fontFamily: root.bar ? root.bar.fontFamily : Style.font.menuFamily; fontSize: Style.font.caption; background: Color.accent; foreground: Color.background; onClicked: root.openConfig() } }
         }
 
         Text { visible: !root.configOpen && root.events.length === 0 && root.teams.length > 0; width: parent.width; text: root.errorMessage || root.words("No hay partidos en el rango configurado.", "No matches in the configured range."); color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.5); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; wrapMode: Text.Wrap; textFormat: Text.PlainText }
-        Text { visible: !root.configOpen; width: parent.width; text: root.updatedAt ? "ESPN · " + root.words("actualizado", "updated") + " " + root.updatedAt.substring(11, 16) : "ESPN"; color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.42); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9 }
+        Row {
+          visible: !root.configOpen
+          width: parent.width
+          spacing: Style.space(5)
+          Text {
+            visible: footballProc.running
+            text: "⟳"
+            color: Color.accent
+            font.family: root.bar ? root.bar.fontFamily : Style.font.family
+            font.pixelSize: 11
+            RotationAnimation on rotation { from: 0; to: 360; duration: 900; loops: Animation.Infinite; running: footballProc.running }
+          }
+          Text { width: parent.width - (footballProc.running ? 16 : 0); text: root.updatedAt ? "ESPN · " + root.words("actualizado", "updated") + " " + root.updatedAt.substring(11, 16) : (footballProc.running ? "ESPN · " + root.words("actualizando…", "updating…") : "ESPN"); color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.42); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9 }
+        }
       }
     }
   }
@@ -520,22 +576,33 @@ Panel {
     Text { anchors.centerIn: parent; text: root.initials(team); color: root.teamColor(team); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 12; font.bold: true; visible: logo.status !== Image.Ready }
   }
 
-  component MatchRow: Rectangle {
+  component MatchRow: Button {
     property var event: ({})
     property bool upcoming: true
     width: contentColumn.width
     height: 43
-    radius: 8
-    color: rowMouse.containsMouse ? Util.alpha(Color.accent, 0.16) : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.055)
+    leftAlign: true
+    bordered: false
+    fontFamily: root.bar ? root.bar.fontFamily : Style.font.menuFamily
+    foreground: root.bar ? root.bar.barForeground : Color.foreground
+    onClicked: root.openEvent(event)
+    scale: 1
+    opacity: 1
+    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+    Behavior on opacity { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+    property int _entryIndex: 0
+    onVisibleChanged: {
+      if (visible) { scale = 0.96; opacity = 0; Qt.callLater(function() { scale = 1; opacity = 1 }) }
+    }
+
     Row {
       anchors.fill: parent
       anchors.leftMargin: 9
       anchors.rightMargin: 9
       spacing: 8
-      Text { width: 56; anchors.verticalCenter: parent.verticalCenter; text: root.translateDay(event.day); color: upcoming ? Color.accent : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.52); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; elide: Text.ElideRight }
-      Column { width: parent.width - 56 - 78 - parent.spacing * 2; anchors.verticalCenter: parent.verticalCenter; spacing: 1; Text { width: parent.width; text: root.eventLabel(event); color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; font.bold: true; elide: Text.ElideRight } Text { width: parent.width; text: event.league || event.status || ""; color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.45); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; elide: Text.ElideRight } }
-      Text { width: 78; anchors.verticalCenter: parent.verticalCenter; text: upcoming ? event.time : root.scoreLabel(event); color: upcoming ? (root.bar ? root.bar.barForeground : Color.foreground) : Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: upcoming ? 11 : 12; font.bold: true; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
+      Text { width: 56; anchors.verticalCenter: parent.verticalCenter; text: root.translateDay(event.day); color: upcoming ? Color.accent : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.52); font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 10; font.bold: true; elide: Text.ElideRight }
+      Column { width: parent.width - 56 - 78 - parent.spacing * 2; anchors.verticalCenter: parent.verticalCenter; spacing: 1; Text { width: parent.width; text: root.eventLabel(event); color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 11; font.bold: true; elide: Text.ElideRight } Text { width: parent.width; text: event.league || event.status || ""; color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.45); font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 9; elide: Text.ElideRight } }
+      Text { width: 78; anchors.verticalCenter: parent.verticalCenter; text: upcoming ? event.time : root.scoreLabel(event); color: upcoming ? (root.bar ? root.bar.barForeground : Color.foreground) : Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: upcoming ? 11 : 12; font.bold: true; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
     }
-    MouseArea { id: rowMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.openEvent(event) }
   }
 }
