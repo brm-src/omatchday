@@ -360,8 +360,8 @@ Panel {
           anchors.centerIn: parent
           text: "⟳"
           color: Color.accent
-          font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily
-          font.pixelSize: 16
+          font.family: Style.font.menuFamily
+          font.pixelSize: Style.font.icon
           RotationAnimation on rotation { from: 0; to: 360; duration: 700; loops: Animation.Infinite; running: parent.visible }
         }
       }
@@ -369,23 +369,23 @@ Panel {
       Column {
         id: contentColumn
         width: scroll.width
-        spacing: Style.space(11)
+        spacing: Style.spacing.md
 
         Row {
           width: parent.width
-          spacing: Style.space(8)
+          spacing: Style.spacing.sm
           Column {
-            width: parent.width - panelActions.width - Style.space(8)
+            width: parent.width - panelActions.width - Style.spacing.sm
             spacing: 1
-            Text { text: "OMATCHDAY"; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: Style.font.caption; font.bold: true; font.letterSpacing: 1.5 }
-            Text { text: root.teams.length > 0 ? root.teams.map(function(team) { return team.abbreviation || team.shortName }).join(" · ") : root.words("CENTRO DE PARTIDOS", "MATCH CENTER"); color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.5); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; elide: Text.ElideRight }
+            Text { text: "OMATCHDAY"; color: Color.accent; font.family: Style.font.menuFamily; font.pixelSize: Style.font.caption; font.bold: true; font.letterSpacing: 1.5 }
+            Text { text: root.teams.length > 0 ? root.teams.map(function(team) { return team.abbreviation || team.shortName }).join(" · ") : root.words("CENTRO DE PARTIDOS", "MATCH CENTER"); color: Util.alpha(Color.menu.text, 0.45); font.family: Style.font.menuFamily; font.pixelSize: Style.font.caption; elide: Text.ElideRight }
           }
           Row {
             id: panelActions
-            spacing: Style.space(3)
-            Button { iconText: "⚙"; foreground: root.bar ? root.bar.barForeground : Color.foreground; tooltipText: root.words("Configurar equipos y notificaciones", "Configure teams and notifications"); onClicked: root.openConfig() }
-            Button { iconText: "↻"; foreground: root.bar ? root.bar.barForeground : Color.foreground; onClicked: root.refresh() }
-            Button { iconText: "×"; foreground: root.bar ? root.bar.barForeground : Color.foreground; onClicked: root.close() }
+            spacing: Style.spacing.xs
+            Button { iconText: "⚙"; foreground: Color.menu.text; tooltipText: root.words("Configurar equipos y notificaciones", "Configure teams and notifications"); onClicked: root.openConfig() }
+            Button { iconText: "↻"; foreground: Color.menu.text; onClicked: root.refresh() }
+            Button { iconText: "×"; foreground: Color.menu.text; onClicked: root.close() }
           }
         }
 
@@ -395,36 +395,36 @@ Panel {
           id: configColumn
           visible: root.configOpen
           width: parent.width
-          spacing: Style.space(9)
+          spacing: Style.spacing.sm
 
-          Text { text: root.words("CONFIGURACIÓN", "SETTINGS"); color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; font.bold: true; font.letterSpacing: 0.8 }
-          Text { width: parent.width; text: root.words("Elige una liga y los equipos que quieres seguir.", "Pick a league and the teams you want to follow."); color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.65); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; wrapMode: Text.Wrap }
+          Text { text: root.words("CONFIGURACIÓN", "SETTINGS"); color: Color.accent; font.family: Style.font.menuFamily; font.pixelSize: Style.font.body; font.bold: true; font.letterSpacing: 0.8 }
+          Text { width: parent.width; text: root.words("Elige una liga y los equipos que quieres seguir.", "Pick a league and the teams you want to follow."); color: Util.alpha(Color.menu.text, 0.65); font.family: Style.font.menuFamily; font.pixelSize: Style.font.bodySmall; wrapMode: Text.Wrap }
 
-          Text { text: root.words("LIGA", "LEAGUE"); color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.65); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.8 }
+          Text { text: root.words("LIGA", "LEAGUE"); color: Util.alpha(Color.menu.text, 0.65); font.family: Style.font.menuFamily; font.pixelSize: Style.font.caption; font.bold: true; font.letterSpacing: 0.8 }
           Row {
-            spacing: Style.space(4)
+            spacing: Style.spacing.xs
             Repeater {
               model: [["eng.1", root.words("ING", "ENG")], ["esp.1", "ESP"], ["ita.1", "ITA"], ["ger.1", "GER"], ["fra.1", "FRA"]]
               delegate: Button {
                 required property var modelData
                 text: modelData[1]
                 active: root.configLeague === modelData[0]
-                foreground: root.bar ? root.bar.barForeground : Color.foreground
+                foreground: Color.menu.text
                 accent: Color.accent
                 onClicked: { root.configLeague = modelData[0]; root.draftTeams = []; root.loadCatalog() }
               }
             }
           }
 
-          Text { text: root.words("EQUIPOS", "TEAMS"); color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.65); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.8 }
-          Text { text: root.draftTeams.length > 0 ? root.draftTeams.length + root.words(" seleccionados · puedes elegir varios", " selected · you can pick several") : root.words("Ningún equipo seleccionado", "No team selected"); color: root.draftTeams.length > 0 ? Color.accent : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.55); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9 }
+          Text { text: root.words("EQUIPOS", "TEAMS"); color: Util.alpha(Color.menu.text, 0.65); font.family: Style.font.menuFamily; font.pixelSize: Style.font.caption; font.bold: true; font.letterSpacing: 0.8 }
+          Text { text: root.draftTeams.length > 0 ? root.draftTeams.length + root.words(" seleccionados · puedes elegir varios", " selected · you can pick several") : root.words("Ningún equipo seleccionado", "No team selected"); color: root.draftTeams.length > 0 ? Color.accent : Util.alpha(Color.menu.text, 0.55); font.family: Style.font.menuFamily; font.pixelSize: Style.font.caption }
           ListView {
             id: teamList
             model: root.catalog
             width: configColumn.width
             height: Math.min(280, Math.max(44, root.catalog.length * 40))
             clip: true
-            spacing: Style.space(5)
+            spacing: Style.spacing.sm
             boundsBehavior: Flickable.StopAtBounds
             delegate: Button {
               required property var modelData
@@ -434,7 +434,7 @@ Panel {
               leftAlign: true
               selected: root.isDraftSelected(modelData)
               bordered: true
-              foreground: root.bar ? root.bar.barForeground : Color.foreground
+              foreground: Color.menu.text
               accent: Color.accent
               onClicked: root.toggleDraftTeam(modelData)
             }
@@ -446,15 +446,15 @@ Panel {
             leftAlign: true
             selected: root.notificationsEnabled
             bordered: true
-            foreground: root.bar ? root.bar.barForeground : Color.foreground
+            foreground: Color.menu.text
             accent: Color.accent
             onClicked: root.notificationsEnabled = !root.notificationsEnabled
           }
 
-          Text { visible: root.configMessage !== ""; width: parent.width; text: root.configMessage; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; wrapMode: Text.Wrap }
+          Text { visible: root.configMessage !== ""; width: parent.width; text: root.configMessage; color: Color.accent; font.family: Style.font.menuFamily; font.pixelSize: Style.font.bodySmall; wrapMode: Text.Wrap }
           Row {
-            spacing: Style.space(5)
-            Button { text: root.words("Cancelar", "Cancel"); foreground: root.bar ? root.bar.barForeground : Color.foreground; onClicked: root.configOpen = false }
+            spacing: Style.spacing.sm
+            Button { text: root.words("Cancelar", "Cancel"); foreground: Color.menu.text; onClicked: root.configOpen = false }
             Button { text: root.words("Guardar", "Save"); height: 32; background: Color.accent; foreground: Color.background; accent: Color.accent; onClicked: root.saveConfig() }
           }
         }
@@ -464,35 +464,35 @@ Panel {
           width: parent.width
           height: heroColumn.implicitHeight + Style.space(24)
           radius: Style.cornerRadius + 2
-          color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.07)
+          color: Util.alpha(Color.menu.text, 0.07)
           border.width: 1
           border.color: Util.alpha(root.nextEvent ? root.teamColor(root.nextEvent.home) : Color.accent, 0.55)
           Column {
             id: heroColumn
             anchors.fill: parent
             anchors.margins: Style.space(12)
-            spacing: Style.space(7)
+            spacing: Style.spacing.sm
             Row {
               width: parent.width
-              Text { width: parent.width - heroStatus.implicitWidth; text: root.nextEvent ? root.translateDay(root.nextEvent.day) + "  ·  " + root.nextEvent.time : ""; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 11; font.bold: true }
-              Text { id: heroStatus; text: root.statusLabel(root.nextEvent); color: root.nextEvent && root.nextEvent.state === "in" ? Color.accent : Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.4); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.8 }
+              Text { width: parent.width - heroStatus.implicitWidth; text: root.nextEvent ? root.translateDay(root.nextEvent.day) + "  ·  " + root.nextEvent.time : ""; color: Color.accent; font.family: Style.font.menuFamily; font.pixelSize: Style.font.body; font.bold: true }
+              Text { id: heroStatus; text: root.statusLabel(root.nextEvent); color: root.nextEvent && root.nextEvent.state === "in" ? Color.accent : Util.alpha(Color.menu.text, 0.55); font.family: Style.font.menuFamily; font.pixelSize: Style.font.caption; font.bold: true; font.letterSpacing: 0.8 }
             }
             Row {
               width: parent.width
               height: 70
-              spacing: Style.space(9)
+              spacing: Style.spacing.sm
               TeamBadge { team: root.nextEvent ? root.nextEvent.home : ({}) }
               Column {
                 width: parent.width - 130
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 2
-                Text { width: parent.width; text: root.nextEvent ? root.nextEvent.home.shortName : ""; color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 13; font.bold: true; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
-                Text { width: parent.width; text: root.scoreLabel(root.nextEvent); color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 18; font.bold: true; horizontalAlignment: Text.AlignRight }
-                Text { width: parent.width; text: root.nextEvent ? root.nextEvent.away.shortName : ""; color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 13; font.bold: true; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
+                Text { width: parent.width; text: root.nextEvent ? root.nextEvent.home.shortName : ""; color: Color.menu.text; font.family: Style.font.menuFamily; font.pixelSize: Style.font.body; font.bold: true; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
+                Text { width: parent.width; text: root.scoreLabel(root.nextEvent); color: Color.accent; font.family: Style.font.menuFamily; font.pixelSize: Style.font.title; font.bold: true; horizontalAlignment: Text.AlignRight }
+                Text { width: parent.width; text: root.nextEvent ? root.nextEvent.away.shortName : ""; color: Color.menu.text; font.family: Style.font.menuFamily; font.pixelSize: Style.font.body; font.bold: true; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
               }
               TeamBadge { team: root.nextEvent ? root.nextEvent.away : ({}) }
             }
-            Text { width: parent.width; text: root.nextEvent ? root.nextEvent.league + (root.nextEvent.venue ? "  ·  " + root.nextEvent.venue : "") : ""; color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.5); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; elide: Text.ElideRight }
+            Text { width: parent.width; text: root.nextEvent ? root.nextEvent.league + (root.nextEvent.venue ? "  ·  " + root.nextEvent.venue : "") : ""; color: Util.alpha(Color.menu.text, 0.45); font.family: Style.font.menuFamily; font.pixelSize: Style.font.bodySmall; elide: Text.ElideRight }
           }
           MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.openEvent(root.nextEvent) }
         }
@@ -510,41 +510,41 @@ Panel {
               selected: root.view === modelData[0]
               active: root.view === modelData[0]
               bordered: true
-              fontFamily: root.bar ? root.bar.fontFamily : Style.font.family
+              fontFamily: Style.font.menuFamily
               fontSize: Style.font.caption
               onClicked: root.view = modelData[0]
             }
           }
         }
 
-        Text { visible: !root.configOpen && root.view === "agenda" && root.upcomingEvents.length > 0; text: root.words("PRÓXIMOS PARTIDOS", "UPCOMING MATCHES"); color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.35); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.9 }
+        Text { visible: !root.configOpen && root.view === "agenda" && root.upcomingEvents.length > 0; text: root.words("PRÓXIMOS PARTIDOS", "UPCOMING MATCHES"); color: Util.alpha(Color.menu.text, 0.55); font.family: Style.font.menuFamily; font.pixelSize: Style.font.bodySmall; font.bold: true; font.letterSpacing: 0.9 }
         Repeater { model: !root.configOpen && root.view === "agenda" ? Math.min(root.upcomingEvents.length, 6) : 0; delegate: MatchRow { event: root.upcomingEvents[index]; upcoming: true } }
 
-        Text { visible: !root.configOpen && root.view === "results" && root.selectedDate === "" && root.previousEvents.length > 0; text: root.words("ÚLTIMOS RESULTADOS", "LATEST RESULTS"); color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.35); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.9 }
+        Text { visible: !root.configOpen && root.view === "results" && root.selectedDate === "" && root.previousEvents.length > 0; text: root.words("ÚLTIMOS RESULTADOS", "LATEST RESULTS"); color: Util.alpha(Color.menu.text, 0.55); font.family: Style.font.menuFamily; font.pixelSize: Style.font.bodySmall; font.bold: true; font.letterSpacing: 0.9 }
         Repeater { model: !root.configOpen && root.view === "results" && root.selectedDate === "" ? Math.min(root.previousEvents.length, 6) : 0; delegate: MatchRow { event: root.previousEvents[index]; upcoming: false } }
-        Text { visible: !root.configOpen && root.view === "results" && root.selectedDate !== ""; text: root.words("PARTIDOS DEL ", "MATCHES ON ") + root.selectedDate; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.8 }
+        Text { visible: !root.configOpen && root.view === "results" && root.selectedDate !== ""; text: root.words("PARTIDOS DEL ", "MATCHES ON ") + root.selectedDate; color: Color.accent; font.family: Style.font.menuFamily; font.pixelSize: Style.font.bodySmall; font.bold: true; font.letterSpacing: 0.8 }
         Repeater { model: !root.configOpen && root.view === "results" && root.selectedDate !== "" ? root.selectedEvents.length : 0; delegate: MatchRow { event: root.selectedEvents[index]; upcoming: !root.isPast(root.selectedEvents[index]) } }
 
         Column {
           visible: !root.configOpen && root.view === "calendar"
           width: parent.width
-          spacing: Style.space(6)
+          spacing: Style.spacing.xs
           Row {
             width: parent.width
             height: 25
-            Button { iconText: "‹"; foreground: root.bar ? root.bar.barForeground : Color.foreground; onClicked: root.moveMonth(-1) }
-            Text { width: parent.width - 46 - todayButton.width; text: root.monthLabel(); color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 12; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+            Button { iconText: "‹"; foreground: Color.menu.text; onClicked: root.moveMonth(-1) }
+            Text { width: parent.width - 46 - todayButton.width; text: root.monthLabel(); color: Color.menu.text; font.family: Style.font.menuFamily; font.pixelSize: Style.font.body; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
             Button {
               id: todayButton
               text: root.words("hoy", "today")
-              fontFamily: root.bar ? root.bar.fontFamily : Style.font.family
+              fontFamily: Style.font.menuFamily
               fontSize: Style.font.caption
               onClicked: { shownMonth = new Date(); today = new Date(); selectedDate = "" }
             }
-            Button { iconText: "›"; foreground: root.bar ? root.bar.barForeground : Color.foreground; onClicked: root.moveMonth(1) }
+            Button { iconText: "›"; foreground: Color.menu.text; onClicked: root.moveMonth(1) }
           }
-          Grid { id: weekdayGrid; width: parent.width; columns: 7; columnSpacing: Style.space(2); Repeater { model: root.isSpanish ? ["L", "M", "X", "J", "V", "S", "D"] : ["M", "T", "W", "T", "F", "S", "S"]; Text { required property string modelData; width: (weekdayGrid.width - 12) / 7; height: 14; text: modelData; color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.8); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9; font.bold: true; horizontalAlignment: Text.AlignHCenter } } }
-          Grid { id: calendarGrid; width: parent.width; columns: 7; columnSpacing: Style.space(2); rowSpacing: Style.space(2); Repeater { model: root.monthCells; Rectangle { required property var modelData; width: (calendarGrid.width - 12) / 7; height: 24; radius: 6; color: root.isToday(modelData.date) ? Color.accent : (root.eventOnDate(modelData.date) ? Util.alpha(Color.accent, 0.16) : "transparent"); border.width: root.eventOnDate(modelData.date) && !root.isToday(modelData.date) ? 1 : 0; border.color: Util.alpha(Color.accent, 0.60); Text { anchors.centerIn: parent; text: modelData.day; color: root.isToday(modelData.date) ? Color.background : (modelData.inMonth ? (root.bar ? root.bar.barForeground : Color.foreground) : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.25)); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 10; font.bold: root.eventOnDate(modelData.date) || root.isToday(modelData.date) } MouseArea { anchors.fill: parent; enabled: root.eventOnDate(modelData.date); cursorShape: Qt.PointingHandCursor; onClicked: root.selectDay(modelData.date) } } } }
+          Grid { id: weekdayGrid; width: parent.width; columns: 7; columnSpacing: Style.space(2); Repeater { model: root.isSpanish ? ["L", "M", "X", "J", "V", "S", "D"] : ["M", "T", "W", "T", "F", "S", "S"]; Text { required property string modelData; width: (weekdayGrid.width - 12) / 7; height: 14; text: modelData; color: Util.alpha(Color.menu.text, 0.38); font.family: Style.font.menuFamily; font.pixelSize: Style.font.caption; font.bold: true; horizontalAlignment: Text.AlignHCenter } } }
+          Grid { id: calendarGrid; width: parent.width; columns: 7; columnSpacing: Style.space(2); rowSpacing: Style.space(2); Repeater { model: root.monthCells; Rectangle { required property var modelData; width: (calendarGrid.width - 12) / 7; height: 24; radius: 6; color: root.isToday(modelData.date) ? Color.accent : (root.eventOnDate(modelData.date) ? Util.alpha(Color.accent, 0.16) : "transparent"); border.width: root.eventOnDate(modelData.date) && !root.isToday(modelData.date) ? 1 : 0; border.color: Util.alpha(Color.accent, 0.60); Text { anchors.centerIn: parent; text: modelData.day; color: root.isToday(modelData.date) ? Color.background : (modelData.inMonth ? (Color.menu.text) : Util.alpha(Color.menu.text, 0.25)); font.family: Style.font.menuFamily; font.pixelSize: Style.font.bodySmall; font.bold: root.eventOnDate(modelData.date) || root.isToday(modelData.date) } MouseArea { anchors.fill: parent; enabled: root.eventOnDate(modelData.date); cursorShape: Qt.PointingHandCursor; onClicked: root.selectDay(modelData.date) } } } }
         }
 
         Rectangle {
@@ -555,24 +555,24 @@ Panel {
           color: Util.alpha(Color.accent, 0.11)
           border.width: 1
           border.color: Util.alpha(Color.accent, 0.38)
-          Column { id: setupColumn; anchors.fill: parent; anchors.margins: 11; spacing: 5; Text { text: root.words("ELIGE TUS EQUIPOS", "CHOOSE YOUR TEAMS"); color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 10; font.bold: true; font.letterSpacing: 0.8 } Text { width: parent.width; text: root.words("Configura ligas y equipos desde el asistente.", "Set up leagues and teams from the assistant."); color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 11; wrapMode: Text.Wrap } Button { text: root.words("Configurar", "Configure"); fontFamily: root.bar ? root.bar.fontFamily : Style.font.menuFamily; fontSize: Style.font.caption; background: Color.accent; foreground: Color.background; onClicked: root.openConfig() } }
+          Column { id: setupColumn; anchors.fill: parent; anchors.margins: 11; spacing: 5; Text { text: root.words("ELIGE TUS EQUIPOS", "CHOOSE YOUR TEAMS"); color: Color.accent; font.family: Style.font.menuFamily; font.pixelSize: Style.font.bodySmall; font.bold: true; font.letterSpacing: 0.8 } Text { width: parent.width; text: root.words("Configura ligas y equipos desde el asistente.", "Set up leagues and teams from the assistant."); color: Color.menu.text; font.family: Style.font.menuFamily; font.pixelSize: Style.font.body; wrapMode: Text.Wrap } Button { text: root.words("Configurar", "Configure"); fontFamily: Style.font.menuFamily; fontSize: Style.font.caption; background: Color.accent; foreground: Color.background; onClicked: root.openConfig() } }
         }
 
-        Text { visible: !root.configOpen && root.events.length === 0 && root.teams.length > 0; width: parent.width; text: root.errorMessage || root.words("No hay partidos en el rango configurado.", "No matches in the configured range."); color: Qt.darker(root.bar ? root.bar.barForeground : Color.foreground, 1.5); font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 11; wrapMode: Text.Wrap; textFormat: Text.PlainText }
-        Text { visible: !root.configOpen && root.errorMessage !== "" && !footballProc.running; width: parent.width; text: root.errorMessage; color: Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 11; wrapMode: Text.Wrap; textFormat: Text.PlainText }
+        Text { visible: !root.configOpen && root.events.length === 0 && root.teams.length > 0; width: parent.width; text: root.errorMessage || root.words("No hay partidos en el rango configurado.", "No matches in the configured range."); color: Util.alpha(Color.menu.text, 0.45); font.family: Style.font.menuFamily; font.pixelSize: Style.font.body; wrapMode: Text.Wrap; textFormat: Text.PlainText }
+        Text { visible: !root.configOpen && root.errorMessage !== "" && !footballProc.running; width: parent.width; text: root.errorMessage; color: Color.accent; font.family: Style.font.menuFamily; font.pixelSize: Style.font.body; wrapMode: Text.Wrap; textFormat: Text.PlainText }
         Row {
           visible: !root.configOpen
           width: parent.width
-          spacing: Style.space(5)
+          spacing: Style.spacing.sm
           Text {
             visible: footballProc.running
             text: "⟳"
             color: Color.accent
-            font.family: root.bar ? root.bar.fontFamily : Style.font.family
-            font.pixelSize: 11
+            font.family: Style.font.menuFamily
+            font.pixelSize: Style.font.body
             RotationAnimation on rotation { from: 0; to: 360; duration: 900; loops: Animation.Infinite; running: footballProc.running }
           }
-          Text { width: parent.width - (footballProc.running ? 16 : 0); text: root.updatedAt ? "ESPN · " + root.words("actualizado", "updated") + " " + root.updatedAt.substring(11, 16) : (footballProc.running ? "ESPN · " + root.words("actualizando…", "updating…") : "ESPN"); color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.42); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 9 }
+          Text { width: parent.width - (footballProc.running ? 16 : 0); text: root.updatedAt ? "ESPN · " + root.words("actualizado", "updated") + " " + root.updatedAt.substring(11, 16) : (footballProc.running ? "ESPN · " + root.words("actualizando…", "updating…") : "ESPN"); color: Util.alpha(Color.menu.text, 0.42); font.family: Style.font.menuFamily; font.pixelSize: Style.font.caption }
         }
       }
     }
@@ -587,7 +587,7 @@ Panel {
     border.width: 1
     border.color: Util.alpha(root.teamColor(team), 0.62)
     Image { id: logo; anchors.fill: parent; anchors.margins: 8; source: String(team.logo || ""); fillMode: Image.PreserveAspectFit; asynchronous: true; smooth: true }
-    Text { anchors.centerIn: parent; text: root.initials(team); color: root.teamColor(team); font.family: root.bar ? root.bar.fontFamily : Style.font.family; font.pixelSize: 12; font.bold: true; visible: logo.status !== Image.Ready }
+    Text { anchors.centerIn: parent; text: root.initials(team); color: root.teamColor(team); font.family: Style.font.menuFamily; font.pixelSize: Style.font.body; font.bold: true; visible: logo.status !== Image.Ready }
   }
 
   component MatchRow: Button {
@@ -597,8 +597,8 @@ Panel {
     height: 43
     leftAlign: true
     bordered: false
-    fontFamily: root.bar ? root.bar.fontFamily : Style.font.menuFamily
-    foreground: root.bar ? root.bar.barForeground : Color.foreground
+    fontFamily: Style.font.menuFamily
+    foreground: Color.menu.text
     onClicked: root.openEvent(event)
     scale: 1
     opacity: 1
@@ -614,9 +614,9 @@ Panel {
       anchors.leftMargin: 9
       anchors.rightMargin: 9
       spacing: 8
-      Text { width: 56; anchors.verticalCenter: parent.verticalCenter; text: root.translateDay(event.day); color: upcoming ? Color.accent : Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.52); font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 10; font.bold: true; elide: Text.ElideRight }
-      Column { width: parent.width - 56 - 78 - parent.spacing * 2; anchors.verticalCenter: parent.verticalCenter; spacing: 1; Text { width: parent.width; text: root.eventLabel(event); color: root.bar ? root.bar.barForeground : Color.foreground; font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 11; font.bold: true; elide: Text.ElideRight } Text { width: parent.width; text: event.league || event.status || ""; color: Util.alpha(root.bar ? root.bar.barForeground : Color.foreground, 0.45); font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: 9; elide: Text.ElideRight } }
-      Text { width: 78; anchors.verticalCenter: parent.verticalCenter; text: upcoming ? event.time : root.scoreLabel(event); color: upcoming ? (root.bar ? root.bar.barForeground : Color.foreground) : Color.accent; font.family: root.bar ? root.bar.fontFamily : Style.font.menuFamily; font.pixelSize: upcoming ? 11 : 12; font.bold: true; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
+      Text { width: 56; anchors.verticalCenter: parent.verticalCenter; text: root.translateDay(event.day); color: upcoming ? Color.accent : Util.alpha(Color.menu.text, 0.52); font.family: Style.font.menuFamily; font.pixelSize: Style.font.bodySmall; font.bold: true; elide: Text.ElideRight }
+      Column { width: parent.width - 56 - 78 - parent.spacing * 2; anchors.verticalCenter: parent.verticalCenter; spacing: 1; Text { width: parent.width; text: root.eventLabel(event); color: Color.menu.text; font.family: Style.font.menuFamily; font.pixelSize: Style.font.body; font.bold: true; elide: Text.ElideRight } Text { width: parent.width; text: event.league || event.status || ""; color: Util.alpha(Color.menu.text, 0.45); font.family: Style.font.menuFamily; font.pixelSize: Style.font.caption; elide: Text.ElideRight } }
+      Text { width: 78; anchors.verticalCenter: parent.verticalCenter; text: upcoming ? event.time : root.scoreLabel(event); color: upcoming ? (Color.menu.text) : Color.accent; font.family: Style.font.menuFamily; font.pixelSize: upcoming ? 11 : 12; font.bold: true; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
     }
   }
 }
